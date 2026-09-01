@@ -1,0 +1,48 @@
+# Release: a merged pull request merges the lane into the main scope,
+# then the run tags and exports new component versions.
+name: bit-release
+on:
+  pull_request:
+    types: [closed]
+    # `main` is the default branch of this repository.
+    # A pull request that merges into another branch is not on the default
+    # branch yet, so it must not start a release.
+    branches: [main]
+
+# The default GITHUB_TOKEN is read-only in many organizations.
+# The release pushes a commit and it updates the pull request.
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: bit-release-${{ github.event.pull_request.number }}
+  # A run can hold an exported version. Do not cancel it.
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    # A closed pull request is not always a merged pull request.
+    # A merged main-sync pull request releases nothing, because the scope is
+    # already ahead of the merge.
+    if: github.event.pull_request.merged == true && github.event.pull_request.head.ref != 'bit-sync/main'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The release reads the full history. A shallow clone stops the run.
+          fetch-depth: 0
+          # Optional: see bit-sync.yml. The same secret, the same fallback.
+          token: ${{ secrets.BIT_SYNC_GH_TOKEN || secrets.GITHUB_TOKEN }}
+      # The init step reads the token too. Without it, the step stops
+      # with "BIT_CONFIG_ACCESS_TOKEN environment variable is not set!".
+      - uses: bit-tasks/init@v3
+        env:
+          BIT_CONFIG_ACCESS_TOKEN: ${{ secrets.BIT_CONFIG_ACCESS_TOKEN }}
+      # The pin is deliberate, because this job holds write permission.
+      - uses: teambit/bit-git-sync@223af0ec2ae999a182dcb3fe1a8b52d12e3323bf
+        env:
+          # A bit.cloud service-account token. The account merges the lane.
+          BIT_CONFIG_ACCESS_TOKEN: ${{ secrets.BIT_CONFIG_ACCESS_TOKEN }}
+          # GitHub credentials for the commit push and the pull request comment.
+          GITHUB_TOKEN: ${{ secrets.BIT_SYNC_GH_TOKEN || secrets.GITHUB_TOKEN }}

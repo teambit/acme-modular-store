@@ -1,0 +1,84 @@
+# Adopt: it turns an ordinary git pull request into a bit.cloud lane.
+# This workflow is optional. Use it if your developers start work in git
+# instead of on a lane.
+name: bit-adopt-pr
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+# The workflow pushes one commit to the pull request branch.
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: bit-adopt-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  adopt:
+    runs-on: ubuntu-latest
+    # Three branches must not reach the adoption step:
+    # a sync branch, because the action owns it;
+    # a pull request from the bot, because the bot output is not new work;
+    # a pull request from a fork, because the push back is not permitted.
+    if: >-
+      !startsWith(github.event.pull_request.head.ref, 'bit-sync/')
+      && github.event.pull_request.user.login != 'github-actions[bot]'
+      && github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Check out the branch itself, not the merge commit.
+          # The last step pushes to this branch.
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+
+      # The adoption must happen one time for each pull request.
+      # A lane pointer in `.bitmap` is the evidence of an earlier adoption.
+      - id: guard
+        name: Look for an existing lane pointer
+        run: |
+          if [ -f .bitmap ] && grep -q '"_bit_lane"' .bitmap; then
+            echo 'This pull request has a lane already. The job stops here.'
+            echo 'adopted=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'adopted=false' >> "$GITHUB_OUTPUT"
+          fi
+
+      # The init step reads the token too. Without it, the step stops
+      # with "BIT_CONFIG_ACCESS_TOKEN environment variable is not set!".
+      - if: steps.guard.outputs.adopted == 'false'
+        uses: bit-tasks/init@v3
+        env:
+          BIT_CONFIG_ACCESS_TOKEN: ${{ secrets.BIT_CONFIG_ACCESS_TOKEN }}
+
+      # The reconcile workflow uses
+      # teambit/bit-git-sync@223af0ec2ae999a182dcb3fe1a8b52d12e3323bf.
+      # This job calls the command instead, because the action routes a merged
+      # pull request only.
+      - if: steps.guard.outputs.adopted == 'false'
+        name: Create the lane from the pull request
+        run: |
+          bit install
+          bit ci pr --keep-lane
+        env:
+          BIT_CONFIG_ACCESS_TOKEN: ${{ secrets.BIT_CONFIG_ACCESS_TOKEN }}
+
+      - if: steps.guard.outputs.adopted == 'false'
+        name: Push the lane pointer back to the branch
+        run: |
+          if [ -z "$(git status --porcelain .bitmap)" ]; then
+            echo 'The command changed no lane pointer. There is nothing to push.'
+            exit 0
+          fi
+          git config user.name 'bit-sync[bot]'
+          git config user.email 'bit-sync[bot]@users.noreply.github.com'
+          git add .bitmap
+          git commit -m 'chore(bit-sync): adopt this pull request into a lane'
+          git push origin "HEAD:$HEAD_REF"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # The branch name reaches the shell through the environment, never
+          # through the script text, so a crafted branch name cannot run.
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}

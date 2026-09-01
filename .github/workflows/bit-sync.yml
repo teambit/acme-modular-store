@@ -1,0 +1,70 @@
+# Reconcile: it keeps each bit.cloud lane and its git branch equal, and it
+# opens the main-sync pull request when the main scope moves ahead of git.
+name: bit-sync
+on:
+  # The bit.cloud webhook sends this event after every export.
+  # `client_payload.laneId` names the lane. An empty value means a main export.
+  repository_dispatch:
+    types: [bit-export]
+  push:
+    # Pushes to these branches are the action's own output.
+    # They must not start a new sync.
+    branches-ignore: [main, 'bit-sync/**']
+  schedule:
+    # The reconcile repairs a lost webhook delivery.
+    # It is also the only way to find a deleted lane.
+    # bit.cloud has no lane-removed event.
+    - cron: '0 * * * *'
+  workflow_dispatch:
+    inputs:
+      lane:
+        description: Lane to sync. An empty value syncs every lane.
+        required: false
+
+# The default GITHUB_TOKEN is read-only in many organizations.
+# The sync pushes a branch and it opens a pull request.
+# Both scopes must be explicit, or the first write fails with a 403.
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  # Each trigger carries the lane identity in a different place.
+  # The event name must come first in each pair.
+  # `github.ref_name` also holds a value on a schedule run.
+  group: >-
+    bit-sync-${{
+    github.event_name == 'repository_dispatch' && (github.event.client_payload.laneId || 'main-export')
+    || github.event_name == 'push' && github.ref_name
+    || github.event_name == 'workflow_dispatch' && (github.event.inputs.lane || 'reconcile-all')
+    || 'reconcile-all' }}
+  # A run can hold a pushed branch and an unfinished pull request.
+  # Do not cancel it.
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The reconciler reads the full history. A shallow clone stops the run.
+          fetch-depth: 0
+          # Optional: a personal access token or a GitHub App token in the
+          # secret BIT_SYNC_GH_TOKEN. A push made with the default GITHUB_TOKEN
+          # starts no other workflow, so a sync pull request gets no CI checks.
+          # A push made with a personal token does. Without the secret, the
+          # default token is used and nothing changes.
+          token: ${{ secrets.BIT_SYNC_GH_TOKEN || secrets.GITHUB_TOKEN }}
+      # The init step reads the token too. Without it, the step stops
+      # with "BIT_CONFIG_ACCESS_TOKEN environment variable is not set!".
+      - uses: bit-tasks/init@v3
+        env:
+          BIT_CONFIG_ACCESS_TOKEN: ${{ secrets.BIT_CONFIG_ACCESS_TOKEN }}
+      # The pin is deliberate, because this job holds write permission.
+      - uses: teambit/bit-git-sync@223af0ec2ae999a182dcb3fe1a8b52d12e3323bf
+        env:
+          # A bit.cloud service-account token. The account writes to your scope.
+          BIT_CONFIG_ACCESS_TOKEN: ${{ secrets.BIT_CONFIG_ACCESS_TOKEN }}
+          # GitHub credentials for the branch push and the pull request.
+          GITHUB_TOKEN: ${{ secrets.BIT_SYNC_GH_TOKEN || secrets.GITHUB_TOKEN }}

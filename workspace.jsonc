@@ -1,0 +1,57 @@
+/**
+ * The workspace of the ACME store. This repository is a git mirror of the
+ * bit.cloud scope `acme-modular.store`, kept in sync by `bit ci sync`
+ * (the teambit/bit-git-sync action).
+ **/{
+  "$schema": "https://static.bit.dev/teambit/schemas/schema.json",
+  "teambit.workspace/workspace": {
+    "name": "acme-modular-store",
+    "icon": "https://static.bit.dev/brands/bit-logo-min.png",
+    "defaultDirectory": "components/{name}",
+    "defaultScope": "acme-modular.store",
+    "resolveAspectsFromNodeModules": true,
+    "resolveEnvsFromRoots": true
+  },
+  /**
+   * The sync workflow reads this version and installs it on the runner.
+   * 2.2.16 is the floor for cross-scope lane sync; see the
+   * teambit/bit-git-sync-example README for the full history.
+   **/
+  "teambit.harmony/bit": {
+    "engine": "2.2.18"
+  },
+  "teambit.generator/generator": {
+    "envs": []
+  },
+  "teambit.dependencies/dependency-resolver": {
+    "allowScripts": {},
+    "rootComponents": true,
+    "policy": {
+      "dependencies": {
+        "@acme-modular/platform.utils.format-price": "^0.0.1",
+        "@acme-modular/platform.utils.slugify": "^0.0.1"
+      },
+      "peerDependencies": {}
+    },
+    "linkCoreAspects": true,
+    "packageManager": "teambit.dependencies/pnpm"
+  },
+  "teambit.workspace/workspace-config-files": {
+    "enableWorkspaceConfigWrite": true
+  },
+  /**
+   * The configuration that `bit ci sync` and the bit-git-sync action read:
+   * every lane becomes a branch and a pull request, a main export opens the
+   * main-sync pull request, and a conflict halts the sync with a label
+   * instead of guessing.
+   **/
+  "teambit.git/ci": {
+    "sync": {
+      "lanes": [
+        "*"
+      ],
+      "mainSync": "pr",
+      "onConflict": "halt"
+    }
+  }
+}
