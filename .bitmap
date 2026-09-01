@@ -12,7 +12,7 @@
     "cart/order-summary": {
         "name": "cart/order-summary",
         "scope": "acme-modular.store",
-        "version": "8b45be0dc65efaaa057f34c93180bf36efb8a27a",
+        "version": "0.0.4",
         "mainFile": "index.ts",
         "rootDir": "components/cart/order-summary"
     },
@@ -23,12 +23,5 @@
         "mainFile": "index.ts",
         "rootDir": "components/catalog/product-listing"
     },
-    "$schema-version": "17.0.0",
-    "_bit_lane": {
-        "id": {
-            "name": "add-bulk-discount",
-            "scope": "acme-modular.store"
-        },
-        "exported": true
-    }
+    "$schema-version": "17.0.0"
 }
