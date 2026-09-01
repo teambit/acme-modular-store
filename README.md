@@ -107,27 +107,34 @@ Optional second secret `BIT_SYNC_GH_TOKEN` (a GitHub token with `repo`
 scope): pushes made with the default `GITHUB_TOKEN` start no other
 workflows, so sync pull requests get no CI checks. With this secret they do.
 
-### 4. Install the GitHub App
+### 4. Install the GitHub App — it hands you the webhook URL
 
 Install [**bit-git-sync**](https://github.com/apps/bit-git-sync) on your
 repository — **Only select repositories**, Contents read/write is all it
 asks. The App is how bit.cloud's webhook relay authenticates to GitHub:
 org-owned, no personal token, nothing that expires.
 
+After the install, GitHub sends you to the relay's **setup page**, which
+shows the ready-made webhook URL for every repository you installed on —
+per-repository token included. Lost it? Visit
+[`/setup`](https://webhook-relay-gggmal.r2.composed.app/setup) anytime: a
+quick GitHub sign-in shows your URLs again. Each token works for its one
+repository only.
+
 ### 5. Point your scope's webhook at the relay
 
-On your scope, create a webhook for the **export-success** event with the URL
+On your scope, create a webhook for the **export-success** event and paste
+the URL from the setup page:
 
 ```
-https://webhook-relay-gggmal.r2.composed.app/dispatch/<github-owner>/<repo>?token=<relay secret>
+https://webhook-relay-gggmal.r2.composed.app/dispatch/<github-owner>/<repo>?token=<repository token>
 ```
 
 The relay turns each export event into the `repository_dispatch` that starts
 `bit-sync`, using the App installation on your repository. It accepts the
 raw scope-webhook payload as-is — no payload template is needed — and it
 forwards only the fields the action reads (owner, component ids, username,
-lane id). The `<relay secret>` comes from whoever operates the relay; the
-relay itself is an open Bit component,
+lane id). The relay itself is an open Bit component,
 [`teambit.git/apps/webhook-relay`](https://bit.cloud/teambit/git/apps/webhook-relay),
 so you can also fork it and host your own with your own App and secret.
 
