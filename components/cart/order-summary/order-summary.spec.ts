@@ -18,3 +18,17 @@ it('handles an empty cart', () => {
   expect(summary.subtotal).toBe('$0.00');
   expect(summary.lines).toEqual([]);
 });
+
+it('applies the bulk discount at the threshold, rounding down', () => {
+  const summary = summarizeOrder([{ name: 'Desk Lamp', unitPriceCents: 333, quantity: 10 }], {
+    bulkDiscountPercent: 5,
+  });
+  expect(summary.discount).toEqual({ percent: 5, amount: '$1.66', total: '$31.64' });
+});
+
+it('applies no discount below the threshold', () => {
+  const summary = summarizeOrder([{ name: 'Desk Lamp', unitPriceCents: 4900, quantity: 9 }], {
+    bulkDiscountPercent: 5,
+  });
+  expect(summary.discount).toBeUndefined();
+});
