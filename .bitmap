@@ -12,14 +12,14 @@
     "cart/order-summary": {
         "name": "cart/order-summary",
         "scope": "acme-modular.store",
-        "version": "0.0.1",
+        "version": "0.0.3",
         "mainFile": "index.ts",
         "rootDir": "components/cart/order-summary"
     },
     "catalog/product-listing": {
         "name": "catalog/product-listing",
         "scope": "acme-modular.store",
-        "version": "0.0.1",
+        "version": "0.0.2",
         "mainFile": "index.ts",
         "rootDir": "components/catalog/product-listing"
     },
