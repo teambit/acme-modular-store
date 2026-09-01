@@ -33,7 +33,11 @@ up once; the deeper reference with the full behavior table is
    how to sync main (`"mainSync": "pr"`), and what to do on conflict
    (`"halt"`).
 3. **Secret**: add `BIT_CONFIG_ACCESS_TOKEN` — a bit.cloud token whose account
-   can write to the mirrored scope.
+   can **export** to the mirrored scope. A scope token
+   (scope settings → tokens) is read-only: syncs will work but the release
+   step fails with `scope <id> not found` (that message means "export
+   refused"). Use a dedicated service-account user that is a member of the
+   scope, and its token.
 4. **GitHub App**: install [`bit-git-sync`](https://github.com/apps/bit-git-sync)
    on the repository (Contents read/write only). It has no webhook and
    receives nothing; the relay uses it to send `repository_dispatch`.
