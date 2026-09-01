@@ -37,9 +37,13 @@ up once; the deeper reference with the full behavior table is
 4. **GitHub App**: install [`bit-git-sync`](https://github.com/apps/bit-git-sync)
    on the repository (Contents read/write only). It has no webhook and
    receives nothing; the relay uses it to send `repository_dispatch`.
-5. **Webhook**: on the mirrored scope, add an **Export succeeded** webhook to
-   `https://webhook-relay-gggmal.r2.composed.app/dispatch/<github-owner>/<repo>`
-   with the header `Authorization: Bearer <relay secret>`.
+5. **Webhook**: on the mirrored scope, add an **export-success** webhook to
+   `https://webhook-relay-gggmal.r2.composed.app/dispatch/<github-owner>/<repo>?token=<relay secret>`
+   with the payload template
+   `{"owner":"{{owner}}","componentIds":"{{componentIds}}","username":"{{username}}","userId":"{{userId}}","laneId":"{{laneId}}"}`.
+   (Scope webhooks carry no custom header, so the secret travels as the
+   `token` query parameter; the relay also accepts
+   `Authorization: Bearer <secret>` from senders that can set headers.)
 
 After that the loop is closed: `bit export` on any lane reaches this
 repository within seconds, and merging the pull request releases the lane
