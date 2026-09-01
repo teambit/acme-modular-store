@@ -41,9 +41,12 @@ up once; the deeper reference with the full behavior table is
    `https://webhook-relay-gggmal.r2.composed.app/dispatch/<github-owner>/<repo>?token=<relay secret>`
    with the payload template
    `{"owner":"{{owner}}","componentIds":"{{componentIds}}","username":"{{username}}","userId":"{{userId}}","laneId":"{{laneId}}"}`.
-   (Scope webhooks carry no custom header, so the secret travels as the
-   `token` query parameter; the relay also accepts
-   `Authorization: Bearer <secret>` from senders that can set headers.)
+   (A scope-level webhook carries no custom header, so the secret travels as
+   the `token` query parameter. The alternative is an organization-level
+   webhook — org **Settings > Webhooks** — which does support an
+   `Authorization: Bearer <secret>` header, fires for every scope in the
+   org, and must be recreated rather than edited: editing drops its custom
+   headers, a bit.cloud defect verified 2026-07-29.)
 
 After that the loop is closed: `bit export` on any lane reaches this
 repository within seconds, and merging the pull request releases the lane
