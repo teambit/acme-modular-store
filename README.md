@@ -272,10 +272,23 @@ a reconcile is idempotent. Keep it out of public places anyway.
 
 On bit.cloud, open your **scope → Settings → Webhooks** (the URL is
 `bit.cloud/<org>/<scope>/~settings/webhooks`) and click **Create webhook**.
-Event: **Export succeeded** (`export-success` in the API). URL: paste the
-one from the setup page. No headers and no payload template are needed.
-Webhooks are a paid-plan feature; the page shows an Upgrade button instead
-of Create webhook if your organization is not on one.
+Webhooks are available on Team plans and above; below that, the page shows
+an Upgrade button instead.
+
+Fill the form like this:
+
+| Field | Value |
+| --- | --- |
+| URL | The URL from the setup page (below). It must be `https`, which it is. |
+| Description | Anything, or empty. |
+| Expiration | **Never** (the default). |
+| Event | **Export succeeded**. It is the default on a scope's page; on the organization's page the default is Job completed, so change it. |
+| Advanced event filters | Leave closed. |
+| Templates | **Custom template** (the default). Not Discord or Slack. |
+| Headers | Leave empty. |
+| Payload | Leave the prefilled JSON exactly as it is. It lists `owner`, `componentIds`, `username`, `userId` and `laneId`, which is precisely what the action reads. |
+
+Click **Create**.
 
 ```
 https://webhook-relay-gggmal.r2.composed.app/dispatch/<github-owner>/<repo>?token=<repository token>
@@ -290,9 +303,9 @@ webhook per repository, each with that repository's URL.
 
 The relay turns each export event into the `repository_dispatch` that starts
 `bit-sync`, using the App installation on your repository. It accepts the
-raw webhook payload as-is and forwards only the fields the action reads
-(owner, component ids, username, lane id); session details in the event are
-dropped. If the relay is ever unreachable, bit.cloud logs the failed delivery
+form's default payload as-is, and also the raw event a webhook created through
+the API sends; either way it forwards only the fields the action reads (owner,
+component ids, username, lane id). If the relay is ever unreachable, bit.cloud logs the failed delivery
 and the hourly run picks the export up; nothing is lost. The relay itself is
 an open Bit component,
 [`teambit.git/apps/webhook-relay`](https://bit.cloud/teambit/git/apps/webhook-relay);
@@ -309,7 +322,7 @@ Export something (a new snap on a lane is enough) and read the webhook's
 | `202` with `{"dispatched":"<owner>/<repo>"}` | The loop is closed. A `bit-sync` run starts within seconds. |
 | `401` | The token in the URL is wrong. Copy it again from the setup page. |
 | `502` naming what GitHub refused | Usually: the App is not installed on that repository (step 5). |
-| No delivery at all | Wrong event (it must be Export succeeded / `export-success`), or the organization's plan has no webhooks. |
+| No delivery at all | Wrong event (it must be Export succeeded / `export-success`), the webhook expired, or the organization's plan has no webhooks. |
 
 The `bit-sync` run this triggers is the same reconcile as the hourly one, so
 nothing else changes. You are done.
