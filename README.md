@@ -100,8 +100,9 @@ tells you it worked.
 - A bit.cloud scope with at least one exported component, and admin access
   to its organization (step 4 generates an access token there).
 - Webhooks on bit.cloud are available on Team plans and above (check under
-  the organization's **Settings → Billing**). Phase A works on any plan;
-  only step 6 needs the plan.
+  the organization's **Settings → Billing**; the Webhooks page in step 6
+  shows an Upgrade button if the plan lacks them). Phase A works on any
+  plan; only step 6 needs the plan.
 - A GitHub repository you administer. Empty is fine. Its default branch is
   what the workflows call `main`; if yours is named differently, change the
   `branches: [main]` line in `bit-release.yml`. Step 5 installs a GitHub App
@@ -125,6 +126,10 @@ printf 'node_modules/\n' >> .gitignore   # bit init writes no .gitignore
 git add -A && git commit -m "bit workspace mirroring <owner>.<scope>" && git push
 ```
 
+If the repository had no commits yet, run `git checkout -b main` before the
+commit and push with `git push -u origin main`, so the default branch is the
+`main` the workflows expect.
+
 `bit import` writes each component's source under the folder that
 `defaultDirectory` in `workspace.jsonc` names (default `{scope}/{name}`) and
 pins the current versions in `.bitmap`. The commit holds `.bitmap`,
@@ -138,7 +143,8 @@ component.
 ### 2. Add the workflows and the sync config
 
 Copy `bit-sync.yml` and `bit-release.yml` from
-[`.github/workflows/`](.github/workflows/) into your repository unchanged.
+[`.github/workflows/`](.github/workflows/) into `.github/workflows/` in your
+repository (create the folder), unchanged.
 The third file there, `bit-adopt-pr.yml`, is optional: add it only if your
 developers open ordinary pull requests that should become lanes. If you add
 it, expect a `bit-adopt-pr` run on every sync pull request too; its guard
@@ -200,7 +206,7 @@ at its first write.
 ### 4. Add the bit.cloud token secret
 
 1. On bit.cloud, open your **organization → Settings → Access tokens →
-   create new**. Name it after the repository, set **Permission** to
+   create new**. Name it after the repository (e.g. `acme-modular-store`), set **Permission** to
    **Write**, set **Expiration** to Never (or a date you will remember: once
    it lapses, releases fail with `scope <id> not found`), and under
    **Scopes** select the scope this repository mirrors. Click **Generate**
@@ -230,12 +236,13 @@ mkdir try-git-sync && cd try-git-sync
 bit init --default-scope <owner>.<scope> --skip-interactive
 bit import <owner>.<scope>/<component>      # the id as `bit list` prints it, e.g. acme-modular.store/cart/order-summary
 bit lane create try-git-sync
-# edit a file of that component
+# add a comment line to a source file of that component, in the folder bit import printed
 bit snap -m "phase A check"
 bit export
 ```
 
-Then **Actions → bit-sync → Run workflow** (leave the lane input empty). The
+Then **Actions → bit-sync → Run workflow** (use workflow from `main`, leave
+the lane input empty). The
 run is listed under branch `main`; that is normal, the reconcile runs from
 `main` and writes to the other branches. Its log shows a warning that an
 uncommitted change to `workspace.jsonc` will be discarded; that is the init
@@ -249,8 +256,9 @@ About a minute later a branch `try-git-sync` and a pull request titled
 Merge the pull request with the **Create a merge commit** button (squash and
 rebase are untested here). About a minute later, under **Actions →
 bit-release**, the run has done three things: it exported a new version of
-the changed component to your scope, it archived the lane, and it pushed one
-commit straight to `main` (`chore: update .bitmap and lockfiles as needed
+the changed component to your scope (log line `Exported 1 component(s)`), it
+archived the lane (`Lane '<owner>.<scope>/try-git-sync' archived
+successfully`), and it pushed one commit straight to `main` (`chore: update .bitmap and lockfiles as needed
 [skip ci]`, author `Bit CI`) that records the released version and carries
 the `workspace.jsonc` reformat mentioned in step 2. The merged branch is
 left in place; delete it if you like. Verify from the repository clone:
@@ -360,6 +368,13 @@ The `bit-sync` run this triggers is the same reconcile as the hourly one, so
 nothing else changes. You are done.
 
 ---
+
+## Turning it off
+
+The hourly schedule in `bit-sync.yml` keeps reconciling for as long as the
+workflow exists. To pause: **Actions → bit-sync → ⋯ → Disable workflow**. To
+stop for good: delete the webhook on the scope, delete the two workflow files,
+and revoke the access token.
 
 ## Configuration reference
 
