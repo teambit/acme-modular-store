@@ -99,8 +99,9 @@ tells you it worked.
 
 - A bit.cloud scope with at least one exported component, and admin access
   to its organization (step 4 generates an access token there).
-- Webhooks on bit.cloud are a paid-plan feature. Phase A works on any plan;
-  step 6 needs the organization on a plan with webhooks.
+- Webhooks on bit.cloud are available on Team plans and above (check under
+  the organization's **Settings → Billing**). Phase A works on any plan;
+  only step 6 needs the plan.
 - A GitHub repository you administer. Empty is fine. Its default branch is
   what the workflows call `main`; if yours is named differently, change the
   `branches: [main]` line in `bit-release.yml`. Step 5 installs a GitHub App
@@ -146,6 +147,8 @@ your repository unchanged, and add the last two keys below to your
   "teambit.workspace/workspace": {
     /* written by bit init, leave as is */
   },
+  /* ...the other keys bit init wrote (generator, dependency-resolver,
+     workspace-config-files) stay as they are... */
   "teambit.harmony/bit": {
     "engine": "2.2.18"
   },
@@ -164,11 +167,7 @@ your repository unchanged, and add the last two keys below to your
 your workspace agree. Pin a concrete version — the runner compares it as a
 string. This repository pins `2.2.18`.
 
-(`bit ci sync --init` scaffolds `bit-sync.yml`, `bit-release.yml` and the
-config block for you; `bit-adopt-pr.yml` is the optional third file. The
-checklist it prints describes a direct webhook with a personal GitHub token,
-which also works; the steps below use the relay instead so no personal token
-is involved.)
+(You do not need to run it, but for reference: `bit ci sync --init` scaffolds `bit-sync.yml`, `bit-release.yml` and the config block; `bit-adopt-pr.yml` is the optional third file. The checklist it prints describes a direct webhook with a personal GitHub token, which also works but is not what this guide uses.)
 
 The workflows reference the action as `teambit/bit-git-sync@v1`. The action
 is a thin router: it reads the GitHub event and runs one `bit ci` command.
@@ -193,9 +192,11 @@ at its first write.
 ### 4. Add the bit.cloud token secret
 
 1. On bit.cloud, open your **organization → Settings → Access tokens →
-   create new**. Name it, set **Permission** to **Write**, pick an
-   expiration, and under **Scopes** select the scope this repository mirrors.
-   Generate and copy the token.
+   create new**. Name it after the repository, set **Permission** to
+   **Write**, set **Expiration** to Never (or a date you will remember: once
+   it lapses, releases fail with `scope <id> not found`), and under
+   **Scopes** select the scope this repository mirrors. Click **Generate**
+   and copy the token; it is shown once.
 2. In GitHub, **Settings → Secrets and variables → Actions → New repository
    secret**, name it `BIT_CONFIG_ACCESS_TOKEN`, paste the token.
 
@@ -213,7 +214,8 @@ workflows, so sync pull requests get no CI checks. With this secret they do.
 ### Check phase A
 
 Export a lane from a **separate** workspace, not from the repository clone
-(the clone mirrors `main` and the workflows own it):
+(the clone mirrors `main` and the workflows own it). In any directory
+outside the clone:
 
 ```sh
 mkdir try-git-sync && cd try-git-sync
@@ -229,18 +231,23 @@ Then **Actions → bit-sync → Run workflow** (leave the lane input empty). The
 run is listed under branch `main`; that is normal, the reconcile runs from
 `main` and writes to the other branches. Its log shows a warning that an
 uncommitted change to `workspace.jsonc` will be discarded; that is the init
-step normalizing the file, and it is expected. About a minute later a branch
-`try-git-sync` and a pull request by `github-actions[bot]` exist.
+step normalizing the file, and it is expected. The step log also opens with
+the command's full help text before the real output; that is normal too.
+About a minute later a branch `try-git-sync` and a pull request titled
+`Lane sync: <owner>.<scope>/try-git-sync`, by `github-actions[bot]`, exist.
 
-Merge the pull request. `bit-release` runs and does three things: it exports
-a new version of the changed component to your scope, it archives the lane,
-and it pushes one commit straight to `main`
-(`chore: update .bitmap and lockfiles as needed [skip ci]`) that records the
-released version. The merged branch is left in place; delete it if you like.
-Verify from the repository clone:
+Merge the pull request with the **Create a merge commit** button (squash and
+rebase are untested here). About a minute later, under **Actions →
+bit-release**, the run has done three things: it exported a new version of
+the changed component to your scope, it archived the lane, and it pushed one
+commit straight to `main` (`chore: update .bitmap and lockfiles as needed
+[skip ci]`, author `Bit CI`) that records the released version and carries
+the `workspace.jsonc` reformat mentioned in step 2. The merged branch is
+left in place; delete it if you like. Verify from the repository clone:
 
 ```sh
 git pull
+bit import                               # fetch the version the bot pinned in .bitmap
 bit log <component>                      # the new version, by bit-sync[bot]
 bit lane list --remote <owner>.<scope>   # try-git-sync is gone
 ```
@@ -275,11 +282,17 @@ On bit.cloud, open your **scope → Settings → Webhooks** (the URL is
 Webhooks are available on Team plans and above; below that, the page shows
 an Upgrade button instead.
 
+Your URL from the setup page looks like this:
+
+```
+https://webhook-relay-gggmal.r2.composed.app/dispatch/<github-owner>/<repo>?token=<repository token>
+```
+
 Fill the form like this:
 
 | Field | Value |
 | --- | --- |
-| URL | The URL from the setup page (below). It must be `https`, which it is. |
+| URL | That URL. The form only accepts `https`, which it is. |
 | Description | Anything, or empty. |
 | Expiration | **Never** (the default). |
 | Event | **Export succeeded**. It is the default on a scope's page; on the organization's page the default is Job completed, so change it. |
@@ -289,10 +302,6 @@ Fill the form like this:
 | Payload | Leave the prefilled JSON exactly as it is. It lists `owner`, `componentIds`, `username`, `userId` and `laneId`, which is precisely what the action reads. |
 
 Click **Create**.
-
-```
-https://webhook-relay-gggmal.r2.composed.app/dispatch/<github-owner>/<repo>?token=<repository token>
-```
 
 A scope webhook fires only for exports to that scope, which is exactly
 what one repository mirrors. The organization also has a Webhooks page; a
@@ -314,8 +323,19 @@ own App and secret.
 
 ### Check phase B
 
-Export something (a new snap on a lane is enough) and read the webhook's
-**delivery log** on bit.cloud:
+Export something without touching GitHub. The phase A lane was archived by
+the release, so make a new one in the `try-git-sync` workspace:
+
+```sh
+bit lane create phase-b-check
+# edit the component file again
+bit snap -m "phase B check"
+bit export
+```
+
+Within a minute a branch `phase-b-check` and its pull request appear, with
+nobody clicking Run workflow. Then read the webhook's **delivery log** on
+bit.cloud (open the webhook on the Webhooks page):
 
 | Delivery status | Meaning |
 | --- | --- |
@@ -370,7 +390,7 @@ correct behavior, not an error.
 | A lane export runs the *main* sync instead of the lane. | The dispatch carried no `laneId`. | Point the webhook at the relay (step 6) — it extracts the lane from the raw event. A hand-rolled dispatch must send `client_payload.laneId` as `"scope-id/lane-name"`. |
 | The run fails with `OutsideWorkspaceError` or "no workspace found". | The repository is not a Bit workspace. | Do step 1: `bit init --default-scope <owner>.<scope>` and commit `workspace.jsonc` and `.bitmap`. |
 | The release run fails when pushing to `main`. | Branch protection blocks the bot's `.bitmap` commit. | Add the GitHub Actions bot to the rule's bypass list, or allow it to push. |
-| Every run is annotated with a Node.js 20 deprecation notice. | An action inside `bit-tasks/init` still declares Node 20. | Harmless. It disappears when that action updates. |
+| Every run is annotated with a Node.js 20 deprecation notice. | Actions used by the workflow (`actions/setup-node@v4` inside `bit-tasks/init`, and `teambit/bit-git-sync@v1`) still declare Node 20. | Harmless. It disappears when those actions update. |
 | The run halts with a shallow-clone message. | `actions/checkout` fetched one commit. | Keep `fetch-depth: 0` in the checkout step. |
 | A run shows as **action required** / later "required approval… expired" on a bot PR. | The repository requires approval for workflow runs on bot pull requests; the job never ran and never needed to. | Approve it, ignore it, or turn the requirement off under **Settings → Actions → General**. |
 | A Ripple job for the last lane snap fails right after a merge. | The release archived the lane while that build was still running. | Expected timing artifact. The release job builds main; that one matters. |
