@@ -137,9 +137,17 @@ component.
 
 ### 2. Add the workflows and the sync config
 
-Copy the three files under [`.github/workflows/`](.github/workflows/) into
-your repository unchanged, and add the last two keys below to your
-`workspace.jsonc`. Order does not matter; mind the comma between keys.
+Copy `bit-sync.yml` and `bit-release.yml` from
+[`.github/workflows/`](.github/workflows/) into your repository unchanged.
+The third file there, `bit-adopt-pr.yml`, is optional: add it only if your
+developers open ordinary pull requests that should become lanes. If you add
+it, expect a `bit-adopt-pr` run on every sync pull request too; its guard
+skips the bot's own pull requests, and GitHub shows such a run as *action
+required* or as a failed run with no jobs. Both are harmless; the `bit-sync`
+and `bit-release` runs are the ones to read.
+
+Then add the last two keys below to your `workspace.jsonc`. Order does not
+matter; mind the comma between keys.
 
 ```jsonc
 {
@@ -220,7 +228,7 @@ outside the clone:
 ```sh
 mkdir try-git-sync && cd try-git-sync
 bit init --default-scope <owner>.<scope> --skip-interactive
-bit import <owner>.<scope>/<one of your components>
+bit import <owner>.<scope>/<component>      # the id as `bit list` prints it, e.g. acme-modular.store/cart/order-summary
 bit lane create try-git-sync
 # edit a file of that component
 bit snap -m "phase A check"
@@ -232,7 +240,9 @@ run is listed under branch `main`; that is normal, the reconcile runs from
 `main` and writes to the other branches. Its log shows a warning that an
 uncommitted change to `workspace.jsonc` will be discarded; that is the init
 step normalizing the file, and it is expected. The step log also opens with
-the command's full help text before the real output; that is normal too.
+the command's full help text before the real output, and the run summary
+carries a Node.js 20 deprecation notice (see Troubleshooting); both are
+normal too.
 About a minute later a branch `try-git-sync` and a pull request titled
 `Lane sync: <owner>.<scope>/try-git-sync`, by `github-actions[bot]`, exist.
 
@@ -248,7 +258,7 @@ left in place; delete it if you like. Verify from the repository clone:
 ```sh
 git pull
 bit import                               # fetch the version the bot pinned in .bitmap
-bit log <component>                      # the new version, by bit-sync[bot]
+bit log <owner>.<scope>/<component>      # the new version, by bit-sync[bot]
 bit lane list --remote <owner>.<scope>   # try-git-sync is gone
 ```
 
@@ -324,7 +334,9 @@ own App and secret.
 ### Check phase B
 
 Export something without touching GitHub. The phase A lane was archived by
-the release, so make a new one in the `try-git-sync` workspace:
+the release, so make a new one in the `try-git-sync` workspace (it is still
+checked out on the old lane locally; `bit lane create` notes that the new
+lane is based on it, which is fine):
 
 ```sh
 bit lane create phase-b-check
@@ -392,7 +404,7 @@ correct behavior, not an error.
 | The release run fails when pushing to `main`. | Branch protection blocks the bot's `.bitmap` commit. | Add the GitHub Actions bot to the rule's bypass list, or allow it to push. |
 | Every run is annotated with a Node.js 20 deprecation notice. | Actions used by the workflow (`actions/setup-node@v4` inside `bit-tasks/init`, and `teambit/bit-git-sync@v1`) still declare Node 20. | Harmless. It disappears when those actions update. |
 | The run halts with a shallow-clone message. | `actions/checkout` fetched one commit. | Keep `fetch-depth: 0` in the checkout step. |
-| A run shows as **action required** / later "required approval… expired" on a bot PR. | The repository requires approval for workflow runs on bot pull requests; the job never ran and never needed to. | Approve it, ignore it, or turn the requirement off under **Settings → Actions → General**. |
+| A `bit-adopt-pr` run on a bot pull request shows as **action required**, "required approval… expired", or **failed with no jobs and no log**. | GitHub does not run workflows for pull requests the bot opened with its own token; it records the run as needing approval or as failed before any job starts. The job never ran and never needed to. | Ignore it, approve it (the guard then skips the job), or leave `bit-adopt-pr.yml` out (step 2). |
 | A Ripple job for the last lane snap fails right after a merge. | The release archived the lane while that build was still running. | Expected timing artifact. The release job builds main; that one matters. |
 
 ## Files
