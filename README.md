@@ -99,8 +99,11 @@ tells you it worked.
 
 - A bit.cloud scope with at least one exported component, and a bit.cloud
   user that can export to it (any scope role that can export: Developer or
-  Admin). Ideally that user is a dedicated service account; step 4 uses its
-  token.
+  Admin). Ideally that user is a dedicated service account: a normal bit.cloud
+  user created for the purpose and added as a member of the scope. Step 4
+  uses its token.
+- Webhooks on bit.cloud are a paid-plan feature. Phase A works on any plan;
+  step 6 needs the organization on a plan with webhooks.
 - A GitHub repository you administer. Empty is fine. Its default branch is
   what the workflows call `main`; if yours is named differently, change the
   `branches: [main]` line in `bit-release.yml`. Step 5 installs a GitHub App
@@ -200,9 +203,11 @@ at its first write.
    name it `BIT_CONFIG_ACCESS_TOKEN`.
 
 Use a dedicated service-account user that is a member of the scope with a
-role that can export (Developer or Admin). A *scope token* (scope settings → tokens) is **read-only**: syncs will pass and
-the release step will fail with `scope <id> not found` — that message means
-"export refused", not "missing scope".
+role that can export (Developer or Admin). The tokens under the
+organization's **Settings → Access tokens** page are **read-only** registry
+tokens: with one of those, syncs will pass and the release step will fail
+with `scope <id> not found` — that message means "export refused", not
+"missing scope". Only a user token can export.
 
 Optional second secret `BIT_SYNC_GH_TOKEN` (a GitHub token with `repo`
 scope): pushes made with the default `GITHUB_TOKEN` start no other
@@ -268,19 +273,31 @@ a reconcile is idempotent. Keep it out of public places anyway.
 
 ### 6. Point your scope's webhook at the relay
 
-On bit.cloud, open your scope → **Settings → Webhooks → New webhook**.
-Event: **export-success** (called "Export succeeded" in the UI). URL: paste
-the one from the setup page. Leave the payload template and headers empty.
+On bit.cloud, open your **organization → Settings → Webhooks** and create a
+webhook. Event: **Export succeeded** (`export-success` in the API). URL:
+paste the one from the setup page. No headers and no payload template are
+needed. Webhooks are a paid-plan feature; the page says so if your
+organization is not on one.
 
 ```
 https://webhook-relay-gggmal.r2.composed.app/dispatch/<github-owner>/<repo>?token=<repository token>
 ```
 
+An organization webhook fires for every export in every scope of the
+organization. That is fine: the relay forwards each event, and the action
+skips any whose components are not on the scope your repository mirrors, so
+you see a short skipped run rather than a wrong sync. If you mirror several
+scopes, create one webhook per repository, each with that repository's URL.
+(A webhook bound to a single scope exists in the API as `createScopeWebHook`
+and works the same way.)
+
 The relay turns each export event into the `repository_dispatch` that starts
 `bit-sync`, using the App installation on your repository. It accepts the
-raw scope-webhook payload as-is and forwards only the fields the action reads
-(owner, component ids, username, lane id). The relay itself is an open Bit
-component,
+raw webhook payload as-is and forwards only the fields the action reads
+(owner, component ids, username, lane id); session details in the event are
+dropped. If the relay is ever unreachable, bit.cloud logs the failed delivery
+and the hourly run picks the export up; nothing is lost. The relay itself is
+an open Bit component,
 [`teambit.git/apps/webhook-relay`](https://bit.cloud/teambit/git/apps/webhook-relay);
 you do not need to host it, but you can fork it and run your own with your
 own App and secret.
@@ -295,7 +312,7 @@ Export something (a new snap on a lane is enough) and read the webhook's
 | `202` with `{"dispatched":"<owner>/<repo>"}` | The loop is closed. A `bit-sync` run starts within seconds. |
 | `401` | The token in the URL is wrong. Copy it again from the setup page. |
 | `502` naming what GitHub refused | Usually: the App is not installed on that repository (step 5). |
-| No delivery at all | Wrong event; it must be `export-success`. |
+| No delivery at all | Wrong event (it must be Export succeeded / `export-success`), or the organization's plan has no webhooks. |
 
 The `bit-sync` run this triggers is the same reconcile as the hourly one, so
 nothing else changes. You are done.
