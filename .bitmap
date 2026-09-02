@@ -12,7 +12,7 @@
     "cart/order-summary": {
         "name": "cart/order-summary",
         "scope": "acme-modular.store",
-        "version": "0.0.4",
+        "version": "1aa9744e68c96e615153710ac10d107731c449ab",
         "mainFile": "index.ts",
         "rootDir": "components/cart/order-summary"
     },
@@ -23,5 +23,12 @@
         "mainFile": "index.ts",
         "rootDir": "components/catalog/product-listing"
     },
-    "$schema-version": "17.0.0"
+    "$schema-version": "17.0.0",
+    "_bit_lane": {
+        "id": {
+            "name": "org-webhook-check",
+            "scope": "acme-modular.store"
+        },
+        "exported": true
+    }
 }
