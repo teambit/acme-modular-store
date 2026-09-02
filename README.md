@@ -97,11 +97,8 @@ tells you it worked.
 
 ### 0. Prerequisites
 
-- A bit.cloud scope with at least one exported component, and a bit.cloud
-  user that can export to it (any scope role that can export: Developer or
-  Admin). Ideally that user is a dedicated service account: a normal bit.cloud
-  user created for the purpose and added as a member of the scope. Step 4
-  uses its token.
+- A bit.cloud scope with at least one exported component, and admin access
+  to its organization (step 4 generates an access token there).
 - Webhooks on bit.cloud are a paid-plan feature. Phase A works on any plan;
   step 6 needs the organization on a plan with webhooks.
 - A GitHub repository you administer. Empty is fine. Its default branch is
@@ -195,20 +192,19 @@ at its first write.
 
 ### 4. Add the bit.cloud token secret
 
-1. Get a token from an account that can **export** to your scope. Log in as
-   that account with `bit login`, then run `bit config get user.token`. It
-   prints a progress line first; the token is the long string on the last
-   line.
-2. **Settings → Secrets and variables → Actions → New repository secret**,
-   name it `BIT_CONFIG_ACCESS_TOKEN`.
+1. On bit.cloud, open your **organization → Settings → Access tokens →
+   create new**. Name it, set **Permission** to **Write**, pick an
+   expiration, and under **Scopes** select the scope this repository mirrors.
+   Generate and copy the token.
+2. In GitHub, **Settings → Secrets and variables → Actions → New repository
+   secret**, name it `BIT_CONFIG_ACCESS_TOKEN`, paste the token.
 
-Use a dedicated service-account user that is a member of the scope with a
-role that can export (Developer or Admin). The tokens made on the
-organization's **Settings → Access tokens** page ("create new") cannot
-export, even though the page says they automate Bit operations: with one of
-those, syncs pass and the release step fails with `scope <id> not found`.
-That message means "export refused", not "missing scope". Only a user token
-can export.
+**Permission must be Write.** The form defaults to Read, and a Read token
+fails exactly one step: syncs pass, and the release step fails with
+`scope <id> not found` right after `Exporting N components`. That message
+means "export refused", not "missing scope". A personal token
+(`bit config get user.token`, last line) also works, but it is tied to a
+person.
 
 Optional second secret `BIT_SYNC_GH_TOKEN` (a GitHub token with `repo`
 scope): pushes made with the default `GITHUB_TOKEN` start no other
@@ -274,23 +270,23 @@ a reconcile is idempotent. Keep it out of public places anyway.
 
 ### 6. Point your scope's webhook at the relay
 
-On bit.cloud, open your **organization → Settings → Webhooks** and click
-**Create webhook**. Event: **Export succeeded** (`export-success` in the
-API). URL: paste the one from the setup page. No headers and no payload
-template are needed. Webhooks are a paid-plan feature; the page shows an
-Upgrade button instead of Create webhook if your organization is not on one.
+On bit.cloud, open your **scope → Settings → Webhooks** (the URL is
+`bit.cloud/<org>/<scope>/~settings/webhooks`) and click **Create webhook**.
+Event: **Export succeeded** (`export-success` in the API). URL: paste the
+one from the setup page. No headers and no payload template are needed.
+Webhooks are a paid-plan feature; the page shows an Upgrade button instead
+of Create webhook if your organization is not on one.
 
 ```
 https://webhook-relay-gggmal.r2.composed.app/dispatch/<github-owner>/<repo>?token=<repository token>
 ```
 
-An organization webhook fires for every export in every scope of the
-organization. That is fine: the relay forwards each event, and the action
-skips any whose components are not on the scope your repository mirrors, so
-you see a short skipped run rather than a wrong sync. If you mirror several
-scopes, create one webhook per repository, each with that repository's URL.
-(A webhook bound to a single scope exists in the API as `createScopeWebHook`
-and works the same way.)
+A scope webhook fires only for exports to that scope, which is exactly
+what one repository mirrors. The organization also has a Webhooks page; a
+webhook there fires for every scope in the organization. That works too, since
+the action skips events whose components are not on your scope, but it makes
+the Actions tab noisier. If you mirror several scopes, create one scope
+webhook per repository, each with that repository's URL.
 
 The relay turns each export event into the `repository_dispatch` that starts
 `bit-sync`, using the App installation on your repository. It accepts the
@@ -357,7 +353,7 @@ correct behavior, not an error.
 | No run after an export. | The webhook delivery failed (or you have no webhook yet, in which case the hourly run picks it up). | Read the delivery log on the scope. `401`: wrong relay token. `502`: the App is not installed on the repository. No delivery at all: wrong event name — it is `export-success`. |
 | A run starts, but no pull request. | The repository forbids the write. | Turn on **Allow GitHub Actions to create and approve pull requests** (step 3). |
 | The run halts and the PR gets the `bit-sync-conflict` label. | Git and the lane changed the same line. | Resolve on the branch, push, remove the label. The lane stays paused while the label is present. |
-| The run halts with `scope <your-scope> not found` right after `Exporting N components`. | The export was refused: the token behind `BIT_CONFIG_ACCESS_TOKEN` cannot write to the scope (scope tokens are read-only). | Use a service-account user token with scope membership (step 4), remove the leftover label, re-run. |
+| The run halts with `scope <your-scope> not found` right after `Exporting N components`. | The export was refused: the token behind `BIT_CONFIG_ACCESS_TOKEN` has Read permission, or does not cover this scope. | Generate a Write token that includes the scope (step 4), replace the secret, remove the leftover label, re-run. |
 | A lane export runs the *main* sync instead of the lane. | The dispatch carried no `laneId`. | Point the webhook at the relay (step 6) — it extracts the lane from the raw event. A hand-rolled dispatch must send `client_payload.laneId` as `"scope-id/lane-name"`. |
 | The run fails with `OutsideWorkspaceError` or "no workspace found". | The repository is not a Bit workspace. | Do step 1: `bit init --default-scope <owner>.<scope>` and commit `workspace.jsonc` and `.bitmap`. |
 | The release run fails when pushing to `main`. | Branch protection blocks the bot's `.bitmap` commit. | Add the GitHub Actions bot to the rule's bypass list, or allow it to push. |
