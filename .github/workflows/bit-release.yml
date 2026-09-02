@@ -28,7 +28,7 @@ jobs:
     # already ahead of the merge.
     if: github.event.pull_request.merged == true && github.event.pull_request.head.ref != 'bit-sync/main'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # The release reads the full history. A shallow clone stops the run.
           fetch-depth: 0
@@ -39,8 +39,10 @@ jobs:
       - uses: bit-tasks/init@v3
         env:
           BIT_CONFIG_ACCESS_TOKEN: ${{ secrets.BIT_CONFIG_ACCESS_TOKEN }}
-      # The pin is deliberate, because this job holds write permission.
-      - uses: teambit/bit-git-sync@223af0ec2ae999a182dcb3fe1a8b52d12e3323bf
+      # v1 is the stable major line of the action. The action only routes the
+      # GitHub event to one `bit ci` command; the code that does the work is bit
+      # itself, at the version pinned by `engine` in workspace.jsonc.
+      - uses: teambit/bit-git-sync@v1
         env:
           # A bit.cloud service-account token. The account merges the lane.
           BIT_CONFIG_ACCESS_TOKEN: ${{ secrets.BIT_CONFIG_ACCESS_TOKEN }}
