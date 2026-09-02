@@ -203,11 +203,12 @@ at its first write.
    name it `BIT_CONFIG_ACCESS_TOKEN`.
 
 Use a dedicated service-account user that is a member of the scope with a
-role that can export (Developer or Admin). The tokens under the
-organization's **Settings → Access tokens** page are **read-only** registry
-tokens: with one of those, syncs will pass and the release step will fail
-with `scope <id> not found` — that message means "export refused", not
-"missing scope". Only a user token can export.
+role that can export (Developer or Admin). The tokens made on the
+organization's **Settings → Access tokens** page ("create new") cannot
+export, even though the page says they automate Bit operations: with one of
+those, syncs pass and the release step fails with `scope <id> not found`.
+That message means "export refused", not "missing scope". Only a user token
+can export.
 
 Optional second secret `BIT_SYNC_GH_TOKEN` (a GitHub token with `repo`
 scope): pushes made with the default `GITHUB_TOKEN` start no other
@@ -273,11 +274,11 @@ a reconcile is idempotent. Keep it out of public places anyway.
 
 ### 6. Point your scope's webhook at the relay
 
-On bit.cloud, open your **organization → Settings → Webhooks** and create a
-webhook. Event: **Export succeeded** (`export-success` in the API). URL:
-paste the one from the setup page. No headers and no payload template are
-needed. Webhooks are a paid-plan feature; the page says so if your
-organization is not on one.
+On bit.cloud, open your **organization → Settings → Webhooks** and click
+**Create webhook**. Event: **Export succeeded** (`export-success` in the
+API). URL: paste the one from the setup page. No headers and no payload
+template are needed. Webhooks are a paid-plan feature; the page shows an
+Upgrade button instead of Create webhook if your organization is not on one.
 
 ```
 https://webhook-relay-gggmal.r2.composed.app/dispatch/<github-owner>/<repo>?token=<repository token>
