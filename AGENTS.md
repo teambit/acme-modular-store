@@ -577,7 +577,9 @@ The backend schema and the query the frontend sends have drifted apart. Compare 
 
 ## Recognize the setup
 
-A repository is a sync mirror when all three are present:
+From any workspace: the scope is synced when its bit.cloud description reads "Mirrored to github.com/<org>/<repo> by bit ci sync". Check it with the MCP `read_scope`. Everything below then applies, and the repository named there is where the change's PR appears.
+
+Inside a repository, it is a sync mirror when all three are present:
 - `workspace.jsonc` has a `"teambit.git/ci": { "sync": … }` block, and its `defaultScope` names the scope it mirrors;
 - `.github/workflows/bit-sync.yml` and `bit-release.yml` exist;
 - `.bitmap` is committed.
@@ -589,6 +591,11 @@ A repository is a sync mirror when all three are present:
 3. **Each lane is a branch with the same name, plus a pull request.** The sync keeps them equal in both directions.
 4. **Merging the pull request is the release.** `bit-release` merges the lane into the scope, exports new versions, archives the lane and commits the new `.bitmap` to `main`.
 5. **The workflows do the work.** You change code, and then you either push a branch or export a lane.
+
+## Rules that override generic Bit guidance
+- **Review happens on the GitHub pull request.** In a synced scope, do **not** submit a bit.cloud change request, even if other instructions say "always submit a change request". The sync opens the PR. Merging the PR is the release. A second review surface splits the reviewers and races the release.
+- **One change, one scope.** Keep a lane inside the scope it is exported to. If the change also needs another scope (for example, a caller must pass a new argument), stop. Make the change backward compatible in this scope, and tell the user which follow-up change the other scope's repository needs. Cross-scope lanes are a preview (see below).
+- **Never push to `main`.** The workflows own it.
 
 ## Make a change: pick a path
 
@@ -612,7 +619,7 @@ gh pr create --fill
 Commit `.bitmap` together with your source changes. Never edit `.bitmap` by hand.
 
 ### Bit-first (any workspace; works for a change across several scopes)
-1. Find components with the Bit Cloud MCP: `read_scopes` / `search_components` for the owner, then `read_components` for APIs. Don't guess IDs.
+1. Find components with the Bit Cloud MCP: `read_scope` / `search_components` for the owner, `read_components` for APIs, and `read_file` for source. Don't guess IDs. Also check who calls the component, so you know whether your change stays inside one scope.
 2. Run:
 ```bash
 bit init --default-scope <owner>.<scope>     # or reuse an existing workspace
@@ -623,7 +630,13 @@ bit validate
 bit snap -m "<message>"
 bit export
 ```
-3. Watch it arrive: `gh pr list -R <org>/<repo> --head <lane-name>`.
+3. Watch it arrive: `gh pr list -R <org>/<repo> --head <lane-name>`. Then tell the user the PR link. Don't submit a bit.cloud change request.
+
+Headless or CI agents can call the Bit Cloud MCP with a bit.cloud token, without the OAuth step:
+```json
+{ "mcpServers": { "bit-cloud": { "type": "http", "url": "https://mcp.bit.cloud/mcp",
+  "headers": { "Authorization": "Bearer ${BIT_CLOUD_TOKEN}" } } } }
+```
 
 ## Read a sync PR
 - The PR body lists the mirrored components and the foreign ones (other scopes, "not mirrored").
@@ -644,8 +657,13 @@ gh workflow run bit-sync -R <repo> -f lane=<lane-name>
 ```
 Never resolve by force-pushing over the bot's commits. Never delete the lane to "start fresh".
 
-## Change several scopes at once
-One lane can carry components from many scopes. Each scope's repository gets a PR with **its own slice**. Merge each PR. The lane is archived after the last scope releases. In the meantime each repository consumes the other scopes' lane versions as packages.
+## Change several scopes at once (preview)
+Prefer one lane per scope: one change, one repository, one PR.
+
+A lane *can* carry components from several scopes. Each scope's repository then mirrors only its own slice, consumes the other scopes' lane versions as packages, and releases its slice when its PR merges. Until automatic fan-out ships, only the repository of the lane's host scope hears about the lane. Start the others by hand:
+```bash
+gh workflow run bit-sync -R <org>/<repo> -f lane=<host-scope>/<lane-name>
+```
 
 ## Connect a new scope to a new repository (one-time)
 ```bash
