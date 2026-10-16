@@ -28,12 +28,22 @@ jobs:
     # already ahead of the merge.
     if: github.event.pull_request.merged == true && github.event.pull_request.head.ref != 'bit-sync/main'
     steps:
+      # Optional: a token from the sync bot GitHub App (variable BIT_SYNC_APP_ID,
+      # secret BIT_SYNC_APP_PRIVATE_KEY). Pushes and pull requests made with an App
+      # token start other workflows, so sync pull requests get CI checks. Without
+      # the App, the run falls back to BIT_SYNC_GH_TOKEN, then to GITHUB_TOKEN.
+      - id: app-token
+        if: ${{ vars.BIT_SYNC_APP_ID != '' }}
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.BIT_SYNC_APP_ID }}
+          private-key: ${{ secrets.BIT_SYNC_APP_PRIVATE_KEY }}
       - uses: actions/checkout@v7
         with:
           # The release reads the full history. A shallow clone stops the run.
           fetch-depth: 0
           # Optional: see bit-sync.yml. The same secret, the same fallback.
-          token: ${{ secrets.BIT_SYNC_GH_TOKEN || secrets.GITHUB_TOKEN }}
+          token: ${{ steps.app-token.outputs.token || secrets.BIT_SYNC_GH_TOKEN || secrets.GITHUB_TOKEN }}
       # The init step reads the token too. Without it, the step stops
       # with "BIT_CONFIG_ACCESS_TOKEN environment variable is not set!".
       - uses: bit-tasks/init@v3
@@ -47,4 +57,4 @@ jobs:
           # A bit.cloud service-account token. The account merges the lane.
           BIT_CONFIG_ACCESS_TOKEN: ${{ secrets.BIT_CONFIG_ACCESS_TOKEN }}
           # GitHub credentials for the commit push and the pull request comment.
-          GITHUB_TOKEN: ${{ secrets.BIT_SYNC_GH_TOKEN || secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token || secrets.BIT_SYNC_GH_TOKEN || secrets.GITHUB_TOKEN }}

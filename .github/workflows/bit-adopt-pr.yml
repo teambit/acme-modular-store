@@ -30,12 +30,23 @@ jobs:
       && github.event.pull_request.user.login != 'github-actions[bot]'
       && github.event.pull_request.head.repo.full_name == github.repository }}
     steps:
+      # Optional: a token from the sync bot GitHub App (variable BIT_SYNC_APP_ID,
+      # secret BIT_SYNC_APP_PRIVATE_KEY). Pushes and pull requests made with an App
+      # token start other workflows, so sync pull requests get CI checks. Without
+      # the App, the run falls back to BIT_SYNC_GH_TOKEN, then to GITHUB_TOKEN.
+      - id: app-token
+        if: ${{ vars.BIT_SYNC_APP_ID != '' }}
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.BIT_SYNC_APP_ID }}
+          private-key: ${{ secrets.BIT_SYNC_APP_PRIVATE_KEY }}
       - uses: actions/checkout@v7
         with:
           # Check out the branch itself, not the merge commit.
           # The last step pushes to this branch.
           ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token || secrets.BIT_SYNC_GH_TOKEN || secrets.GITHUB_TOKEN }}
 
       # The adoption must happen one time for each pull request.
       # A lane pointer in `.bitmap` is the evidence of an earlier adoption.
@@ -81,7 +92,7 @@ jobs:
           git commit -m 'chore(bit-sync): adopt this pull request into a lane'
           git push origin "HEAD:$HEAD_REF"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token || secrets.BIT_SYNC_GH_TOKEN || secrets.GITHUB_TOKEN }}
           # The branch name reaches the shell through the environment, never
           # through the script text, so a crafted branch name cannot run.
           HEAD_REF: ${{ github.event.pull_request.head.ref }}
