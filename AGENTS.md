@@ -645,17 +645,20 @@ Headless or CI agents can call the Bit Cloud MCP with a bit.cloud token, without
 - `Lane sync: <scope>/<lane>` PRs are lanes. `Bit sync: update to latest main scope versions` (branch `bit-sync/main`) brings `main` up to the scope. Merging that one releases nothing.
 
 ## Fix a halt (`bit-sync-conflict` label)
-The lane and the branch changed the same line. The lane stays paused while the label is on the PR.
+The lane and the branch changed the same lines. The lane stays paused while the label is on the PR. The bot's comment on the PR names the components and gives these steps:
 ```bash
-gh pr checkout <pr>
-git pull origin main                          # the bot's comment names the contested files
-# resolve the files, then:
-bit install && bit validate
-git commit -am "fix: resolve sync conflict" && git push
-gh pr edit <pr> --remove-label bit-sync-conflict
-gh workflow run bit-sync -R <repo> -f lane=<lane-name>
+gh repo clone <org>/<repo> && cd <repo>      # or reuse a clone of the mirror
+git fetch origin && git checkout '<branch>'
+bit install
+bit lane import '<host-scope>/<lane>'         # brings the lane's side in; conflicts appear as conflict markers
+# resolve every conflicted file. When the intent is unclear, ask the user which side wins. Don't guess.
+bit validate
+git add -A && git commit -m "fix: resolve sync conflict"
+git push origin '<branch>'
+gh pr edit <pr> -R <org>/<repo> --remove-label bit-sync-conflict
+gh workflow run bit-sync -R <org>/<repo> -f lane=<host-scope>/<lane>
 ```
-Never resolve by force-pushing over the bot's commits. Never delete the lane to "start fresh".
+The next run reports `merge-diverged` or `export-branch`, then `noop (converged)`. Never resolve by force-pushing over the bot's commits. Never delete the lane to "start fresh".
 
 ## Change several scopes at once (preview)
 Prefer one lane per scope: one change, one repository, one PR.
