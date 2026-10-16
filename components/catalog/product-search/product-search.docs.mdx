@@ -1,0 +1,35 @@
+---
+description: 'The catalog search bar: a text query plus a category filter.'
+labels: ['react', 'ui', 'store', 'catalog', 'search']
+---
+
+`ProductSearch` is a controlled search bar with a labelled text input and a category select. It never filters by itself: the page owns `query` and `category` and passes them to `useProducts`. Choosing "All categories" reports `undefined`.
+
+## Controlled filters
+
+```tsx
+import { ProductSearch } from '@acme-modular/store.catalog.product-search';
+
+const [query, setQuery] = useState('');
+const [category, setCategory] = useState<ProductCategory>();
+
+<ProductSearch query={query} onQueryChange={setQuery} category={category} onCategoryChange={setCategory} />
+```
+
+## Wired to the catalog
+
+```tsx
+import { ProductSearch } from '@acme-modular/store.catalog.product-search';
+import { useProducts } from '@acme-modular/store.catalog.use-products';
+
+const { data } = useProducts({ query, category });
+
+<ProductSearch query={query} onQueryChange={setQuery} category={category} onCategoryChange={setCategory} />
+<ProductGrid products={data ?? []} />
+```
+
+## Start pre-filtered
+
+```tsx
+<ProductSearch query="ergonomic" onQueryChange={setQuery} category="chairs" onCategoryChange={setCategory} />
+```

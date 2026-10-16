@@ -1,0 +1,35 @@
+---
+description: The ACME storefront app, composed from eight independently released scopes.
+labels: ['react', 'app', 'storefront']
+---
+
+The storefront composes every ACME scope into one app. Each page is a component that its own team owns and releases from its own Git repository:
+
+| Route | Component | Scope |
+| --- | --- | --- |
+| `/` | `ProductPage` | store |
+| `/checkout` | `CheckoutPage` | checkout (uses payments and shipping) |
+| `/track/:orderId` | `TrackingTimeline` | shipping |
+| `/billing` | `BillingHistoryPage` | billing |
+| `/account` | `ProfilePage` | accounts |
+
+## Run it
+
+```sh
+bit run storefront
+```
+
+## Embed it
+
+```tsx
+import { BrowserRouter } from 'react-router-dom';
+import { Storefront } from '@acme-modular/store.apps.storefront';
+
+<BrowserRouter><Storefront /></BrowserRouter>
+```
+
+## Start on a route
+
+```tsx
+<MemoryRouter initialEntries={['/billing']}><Storefront /></MemoryRouter>
+```
