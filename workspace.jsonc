@@ -18,7 +18,7 @@
    * teambit/bit-git-sync-example README for the full history.
    **/
   "teambit.harmony/bit": {
-    "engine": "2.2.18"
+    "engine": "2.2.115"
   },
   "teambit.generator/generator": {
     "envs": []
