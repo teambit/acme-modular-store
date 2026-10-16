@@ -53,4 +53,3 @@ export function summarizeOrder(lines: CartLine[], options: SummarizeOptions = {}
   return summary;
 }
 
-// org-level webhook check: acme-modular Settings > Webhooks -> relay

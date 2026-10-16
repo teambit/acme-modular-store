@@ -1,0 +1,42 @@
+---
+description: 'The ACME shopping cart: a React context with add, remove, quantities and a bulk discount.'
+labels: ['hook', 'react', 'cart', 'store']
+---
+
+`CartProvider` holds the cart and `useCart` reads and updates it from anywhere below. Totals come from `summarizeOrder`, so carts of 10 or more units get 10% off the subtotal, reported in `summary.discount`. Prices stay in integer cents on every `CartLine`.
+
+## Provide the cart
+
+```tsx
+import { CartProvider } from '@acme-modular/store.cart.use-cart';
+
+export function Store() {
+  return (
+    <CartProvider>
+      <ProductPage />
+      <CartDrawer open={open} onClose={close} />
+    </CartProvider>
+  );
+}
+```
+
+## Add to the cart
+
+```tsx
+import { useCart } from '@acme-modular/store.cart.use-cart';
+
+export function AddButton({ product }: { product: Product }) {
+  const { add, itemCount } = useCart();
+  return <Button onClick={() => add(product)}>Add to cart ({itemCount})</Button>;
+}
+```
+
+## Totals and the bulk discount
+
+```tsx
+const { summary, setQuantity } = useCart();
+setQuantity('p-300', 0); // removes the line
+
+summary.subtotal;        // "$470.00"
+summary.discount?.total; // "$423.00" once the cart holds 10+ units
+```

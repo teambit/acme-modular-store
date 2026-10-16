@@ -1,0 +1,44 @@
+---
+description: 'One cart row: name, unit price, quantity stepper, line total and remove.'
+labels: ['react', 'ui', 'store', 'cart']
+---
+
+`CartLineItem` renders a single `CartLine` with a quantity stepper and a remove action. It is controlled: it reports the new quantity through `onQuantityChange` and never steps below 1, so removing a line is always an explicit `onRemove`.
+
+## With the cart hook
+
+```tsx
+import { CartLineItem } from '@acme-modular/store.cart.cart-line-item';
+import { useCart } from '@acme-modular/store.cart.use-cart';
+
+const { lines, setQuantity, remove } = useCart();
+
+{lines.map((line) => (
+  <CartLineItem
+    key={line.productId}
+    line={line}
+    onQuantityChange={(quantity) => setQuantity(line.productId, quantity)}
+    onRemove={() => remove(line.productId)}
+  />
+))}
+```
+
+## A standalone line
+
+```tsx
+import { CartLineItem } from '@acme-modular/store.cart.cart-line-item';
+
+<CartLineItem
+  line={{ productId: 'p-300', name: 'Desk Lamp', unitPriceCents: 4900, quantity: 2 }}
+  onQuantityChange={setQuantity}
+  onRemove={removeLamp}
+/>
+```
+
+## From a product
+
+```tsx
+import { toCartLine } from '@acme-modular/store.cart.use-cart';
+
+<CartLineItem line={toCartLine(product, 3)} onQuantityChange={update} onRemove={remove} />
+```

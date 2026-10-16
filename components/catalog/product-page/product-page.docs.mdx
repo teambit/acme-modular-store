@@ -1,0 +1,42 @@
+---
+description: 'The catalog page: search, category filter and a product grid wired to the cart.'
+labels: ['react', 'page', 'store', 'catalog']
+---
+
+`ProductPage` combines `ProductSearch`, `ProductGrid` and `useProducts`, and adds products to the shared cart through `useCart`. It shows a spinner on the first load, keeps results on screen while a new search loads, and offers a retry when the catalog fails to load. Render it inside a `CartProvider`.
+
+## In the store
+
+```tsx
+import { ProductPage } from '@acme-modular/store.catalog.product-page';
+import { CartProvider } from '@acme-modular/store.cart.use-cart';
+
+<CartProvider>
+  <ProductPage />
+</CartProvider>
+```
+
+## Against a real API
+
+```tsx
+import { createHttpClient } from '@acme-modular/platform.utils.http-client';
+import { ProductPage } from '@acme-modular/store.catalog.product-page';
+
+const api = createHttpClient({ baseUrl: 'https://api.acme.example/v1' });
+
+<CartProvider>
+  <ProductPage client={api} />
+</CartProvider>
+```
+
+## Next to the cart drawer
+
+```tsx
+import { ProductPage } from '@acme-modular/store.catalog.product-page';
+import { CartDrawer } from '@acme-modular/store.cart.cart-drawer';
+
+<CartProvider>
+  <ProductPage />
+  <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} onCheckout={goToCheckout} />
+</CartProvider>
+```

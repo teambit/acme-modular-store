@@ -1,0 +1,30 @@
+---
+description: 'A responsive grid of product cards with an empty state.'
+labels: ['react', 'ui', 'store', 'catalog', 'grid']
+---
+
+`ProductGrid` lays out `ProductCard`s in as many columns as fit, and forwards each card's "Add to cart" to a single `onAddToCart`. With no products it shows `emptyMessage` instead.
+
+## The catalog
+
+```tsx
+import { ProductGrid } from '@acme-modular/store.catalog.product-grid';
+
+<ProductGrid products={products} onAddToCart={(product) => add(product)} />
+```
+
+## A custom empty state
+
+```tsx
+<ProductGrid products={results} emptyMessage={`Nothing matches “${query}”.`} />
+```
+
+## From a data hook
+
+```tsx
+import { ProductGrid } from '@acme-modular/store.catalog.product-grid';
+import { useProducts } from '@acme-modular/store.catalog.use-products';
+
+const { data } = useProducts({ category: 'lighting' });
+<ProductGrid products={data ?? []} />
+```

@@ -1,0 +1,38 @@
+---
+description: 'The cart in a dialog: lines, subtotal, the bulk discount and a checkout action.'
+labels: ['react', 'ui', 'store', 'cart', 'modal']
+---
+
+`CartDrawer` shows the shared cart from `useCart` in a modal dialog. Each line has a quantity stepper and a remove action. Below the lines it shows the subtotal, the bulk-discount line once the cart holds 10 or more units, and a hint like "Add 2 more items for 10% off" until it does. Render it inside a `CartProvider`.
+
+## Open from a header button
+
+```tsx
+import { CartDrawer } from '@acme-modular/store.cart.cart-drawer';
+import { useCart } from '@acme-modular/store.cart.use-cart';
+
+const [open, setOpen] = useState(false);
+const { itemCount } = useCart();
+
+<Button onClick={() => setOpen(true)}>Cart ({itemCount})</Button>
+<CartDrawer open={open} onClose={() => setOpen(false)} onCheckout={() => navigate('/checkout')} />
+```
+
+## With a restored cart
+
+```tsx
+import { CartDrawer } from '@acme-modular/store.cart.cart-drawer';
+import { CartProvider } from '@acme-modular/store.cart.use-cart';
+
+<CartProvider initialLines={savedLines}>
+  <CartDrawer open onClose={close} />
+</CartProvider>
+```
+
+## Browse-only
+
+Leave out `onCheckout` to hide the checkout button, e.g. while checkout is unavailable.
+
+```tsx
+<CartDrawer open={open} onClose={close} />
+```

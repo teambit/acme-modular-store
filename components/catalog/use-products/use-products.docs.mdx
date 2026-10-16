@@ -1,0 +1,41 @@
+---
+description: 'Loads the ACME catalog, filtered by search query and category.'
+labels: ['hook', 'react', 'data', 'store', 'catalog']
+---
+
+`useProducts` and `useProduct` load catalog products through the platform HTTP client and return `Product` instances in a `FetchState` (`data`, `error`, `loading`, `reload`). Without a `client` they read an in-memory mock of the demo catalog with a short delay, so previews and the demo app run without a backend.
+
+## Search the catalog
+
+```tsx
+import { useProducts } from '@acme-modular/store.catalog.use-products';
+
+export function Lighting() {
+  const { data: products, loading, error } = useProducts({ query: 'led', category: 'lighting' });
+  if (loading && !products) return <Spinner />;
+  if (error) return <Alert tone="negative">{error.message}</Alert>;
+  return <ProductGrid products={products ?? []} />;
+}
+```
+
+## A product detail page
+
+```tsx
+import { useProduct } from '@acme-modular/store.catalog.use-products';
+
+const { data: product, loading } = useProduct('standing-desk');
+if (!loading && !product) return <p>Product not found.</p>;
+```
+
+## Point at a real API
+
+Create the client once (outside render) so the hook does not refetch on every render.
+
+```tsx
+import { createHttpClient } from '@acme-modular/platform.utils.http-client';
+import { useProducts } from '@acme-modular/store.catalog.use-products';
+
+const api = createHttpClient({ baseUrl: 'https://api.acme.example/v1' });
+
+const { data } = useProducts({ query, client: api });
+```

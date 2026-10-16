@@ -1,0 +1,27 @@
+.productPage {
+  padding: var(--spacing-xl, 24px);
+  background: var(--colors-surface-background, #fff);
+  color: var(--colors-text-primary, #212121);
+}
+
+.heading {
+  margin: 0;
+  font-size: var(--typography-sizes-heading-h2, 32px);
+  font-weight: var(--typography-font-weight-bold, 700);
+}
+
+.cartCount {
+  color: var(--colors-text-secondary, #666);
+  font-size: var(--typography-sizes-body-small, 14px);
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  min-height: 160px;
+  align-items: center;
+}
+
+.errorMessage {
+  margin: 0 0 var(--spacing-medium, 8px);
+}

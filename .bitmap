@@ -9,12 +9,66 @@
  */
 
 {
+    "apps/storefront": {
+        "name": "apps/storefront",
+        "scope": "acme-modular.store",
+        "version": "4afffe0b0cd44a8433c26bf1552d5b321b4fe3a1",
+        "mainFile": "index.ts",
+        "rootDir": "components/apps/storefront",
+        "onLanesOnly": true,
+        "isAvailableOnCurrentLane": true
+    },
+    "cart/cart-drawer": {
+        "name": "cart/cart-drawer",
+        "scope": "acme-modular.store",
+        "version": "dcd1b03c052f0b42f117bfeb1ed75e37703f884a",
+        "mainFile": "index.ts",
+        "rootDir": "components/cart/cart-drawer",
+        "onLanesOnly": true,
+        "isAvailableOnCurrentLane": true
+    },
+    "cart/cart-line-item": {
+        "name": "cart/cart-line-item",
+        "scope": "acme-modular.store",
+        "version": "c9fa5d9f52be4bfbe47550b164949054ac0e6370",
+        "mainFile": "index.ts",
+        "rootDir": "components/cart/cart-line-item",
+        "onLanesOnly": true,
+        "isAvailableOnCurrentLane": true
+    },
     "cart/order-summary": {
         "name": "cart/order-summary",
         "scope": "acme-modular.store",
-        "version": "0.0.5",
+        "version": "c4051da4dc22ba8f96ef38e0f9443fd1f7b878d1",
         "mainFile": "index.ts",
         "rootDir": "components/cart/order-summary"
+    },
+    "cart/use-cart": {
+        "name": "cart/use-cart",
+        "scope": "acme-modular.store",
+        "version": "d22ce34a86e09f9fef51c6100ede55f319e8c689",
+        "mainFile": "index.ts",
+        "rootDir": "components/cart/use-cart",
+        "onLanesOnly": true,
+        "isAvailableOnCurrentLane": true
+    },
+    "catalog/product-card": {
+        "name": "catalog/product-card",
+        "scope": "acme-modular.store",
+        "version": "834582452af73d67ac582ab9fed2b6760841e0c2",
+        "mainFile": "index.ts",
+        "rootDir": "components/catalog/product-card",
+        "onLanesOnly": true,
+        "isAvailableOnCurrentLane": true
+    },
+    "catalog/product-grid": {
+        "name": "catalog/product-grid",
+        "scope": "acme-modular.store",
+        "version": "64d6acc443c1ff245640642db7a8fdc1ffc027f8",
+        "mainFile": "index.ts",
+        "rootDir": "components/catalog/product-grid",
+        "onLanesOnly": true,
+        "isAvailableOnCurrentLane": true
     },
     "catalog/product-listing": {
         "name": "catalog/product-listing",
@@ -23,5 +77,39 @@
         "mainFile": "index.ts",
         "rootDir": "components/catalog/product-listing"
     },
-    "$schema-version": "17.0.0"
+    "catalog/product-page": {
+        "name": "catalog/product-page",
+        "scope": "acme-modular.store",
+        "version": "640ebaf9e1b8113b758068b04a648c99a6202aad",
+        "mainFile": "index.ts",
+        "rootDir": "components/catalog/product-page",
+        "onLanesOnly": true,
+        "isAvailableOnCurrentLane": true
+    },
+    "catalog/product-search": {
+        "name": "catalog/product-search",
+        "scope": "acme-modular.store",
+        "version": "3134cad346b76172e49abafbba4a7fbc37684f32",
+        "mainFile": "index.ts",
+        "rootDir": "components/catalog/product-search",
+        "onLanesOnly": true,
+        "isAvailableOnCurrentLane": true
+    },
+    "catalog/use-products": {
+        "name": "catalog/use-products",
+        "scope": "acme-modular.store",
+        "version": "2e9b1efa0ae109bc805b254724faf335907e3577",
+        "mainFile": "index.ts",
+        "rootDir": "components/catalog/use-products",
+        "onLanesOnly": true,
+        "isAvailableOnCurrentLane": true
+    },
+    "$schema-version": "17.0.0",
+    "_bit_lane": {
+        "id": {
+            "name": "org-scale-content",
+            "scope": "acme-modular.platform"
+        },
+        "exported": true
+    }
 }
