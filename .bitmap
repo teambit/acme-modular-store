@@ -12,21 +12,21 @@
     "apps/storefront": {
         "name": "apps/storefront",
         "scope": "acme-modular.store",
-        "version": "0.0.2",
+        "version": "fa1cba6d8d9a12c8e435376f9b475842b865ef3b",
         "mainFile": "index.ts",
         "rootDir": "components/apps/storefront"
     },
     "cart/cart-drawer": {
         "name": "cart/cart-drawer",
         "scope": "acme-modular.store",
-        "version": "0.0.1",
+        "version": "846c0d1dc96b2baf45faeac400df9aeb0a827363",
         "mainFile": "index.ts",
         "rootDir": "components/cart/cart-drawer"
     },
     "cart/cart-line-item": {
         "name": "cart/cart-line-item",
         "scope": "acme-modular.store",
-        "version": "0.0.1",
+        "version": "38eaf273aa9ce51dc74d6c401f99ec7c038b3a70",
         "mainFile": "index.ts",
         "rootDir": "components/cart/cart-line-item"
     },
@@ -40,7 +40,7 @@
     "cart/use-cart": {
         "name": "cart/use-cart",
         "scope": "acme-modular.store",
-        "version": "0.0.1",
+        "version": "2dd5c51f261372669ec5206e21914c1803076fcf",
         "mainFile": "index.ts",
         "rootDir": "components/cart/use-cart"
     },
@@ -68,7 +68,7 @@
     "catalog/product-page": {
         "name": "catalog/product-page",
         "scope": "acme-modular.store",
-        "version": "0.0.2",
+        "version": "6613bfec1f63c37be089bea1312a91180b1b61e3",
         "mainFile": "index.ts",
         "rootDir": "components/catalog/product-page"
     },
