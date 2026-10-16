@@ -1,9 +1,9 @@
 ---
-labels: ['OrderSummary', 'module']
-description: 'A OrderSummary module.'
+labels: ['cart', 'order', 'summary', 'store']
+description: 'Totals a cart in integer cents, with an optional bulk discount, and formats every amount for display.'
 ---
 
-A orderSummary module.
+`summarizeOrder` totals a cart in integer cents and formats every amount only at the end, so totals never drift. Carts that reach the bulk threshold get a percentage off the subtotal, rounded down in the buyer's favor.
 
 ```ts
 orderSummary();

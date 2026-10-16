@@ -33,7 +33,7 @@
     "cart/order-summary": {
         "name": "cart/order-summary",
         "scope": "acme-modular.store",
-        "version": "0.0.6",
+        "version": "aa879bc11d1c40e34f080d4e5e628f653743d855",
         "mainFile": "index.ts",
         "rootDir": "components/cart/order-summary"
     },
@@ -86,5 +86,12 @@
         "mainFile": "index.ts",
         "rootDir": "components/catalog/use-products"
     },
-    "$schema-version": "17.0.0"
+    "$schema-version": "17.0.0",
+    "_bit_lane": {
+        "id": {
+            "name": "order-summary-docs",
+            "scope": "acme-modular.store"
+        },
+        "exported": true
+    }
 }
