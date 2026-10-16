@@ -12,7 +12,7 @@
     "apps/storefront": {
         "name": "apps/storefront",
         "scope": "acme-modular.store",
-        "version": "0.0.1",
+        "version": "036015dc2ca2ff6f739e73fc9602205a7fe4d9a7",
         "mainFile": "index.ts",
         "rootDir": "components/apps/storefront"
     },
@@ -47,14 +47,14 @@
     "catalog/product-card": {
         "name": "catalog/product-card",
         "scope": "acme-modular.store",
-        "version": "0.0.1",
+        "version": "bb0ba7ee0fd9eba053398a0133306247c0be17f2",
         "mainFile": "index.ts",
         "rootDir": "components/catalog/product-card"
     },
     "catalog/product-grid": {
         "name": "catalog/product-grid",
         "scope": "acme-modular.store",
-        "version": "0.0.1",
+        "version": "82da4025251e98b88dd3b18bfc33c45174781641",
         "mainFile": "index.ts",
         "rootDir": "components/catalog/product-grid"
     },
@@ -68,7 +68,7 @@
     "catalog/product-page": {
         "name": "catalog/product-page",
         "scope": "acme-modular.store",
-        "version": "0.0.1",
+        "version": "35416b69c3da3a92946f2acab51763cf85d8378a",
         "mainFile": "index.ts",
         "rootDir": "components/catalog/product-page"
     },
@@ -86,5 +86,12 @@
         "mainFile": "index.ts",
         "rootDir": "components/catalog/use-products"
     },
-    "$schema-version": "17.0.0"
+    "$schema-version": "17.0.0",
+    "_bit_lane": {
+        "id": {
+            "name": "bulk-badge",
+            "scope": "acme-modular.store"
+        },
+        "exported": true
+    }
 }

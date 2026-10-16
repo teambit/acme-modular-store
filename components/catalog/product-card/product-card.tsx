@@ -50,6 +50,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
       <p className={styles.description}>{product.description}</p>
       <div className={styles.meta}>
         <StockBadge stock={product.stock} />
+        {product.inStock && <Badge tone="info">Buy 10, save 10%</Badge>}
         {product.rating !== undefined && (
           <span className={styles.rating} aria-label={`Rated ${product.rating.toFixed(1)} out of 5`}>
             <span aria-hidden="true">★ {product.rating.toFixed(1)}</span>

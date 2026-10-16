@@ -36,3 +36,9 @@ it('warns when stock is low', () => {
   render(<ProductCard product={byId('p-101')} />);
   expect(screen.getByText('Only 3 left')).toBeTruthy();
 });
+
+it('advertises the bulk discount on products in stock', () => {
+  const lamp = mockProducts().find((product) => product.id === 'p-300')!;
+  render(<ProductCard product={lamp} />);
+  expect(screen.getByText('Buy 10, save 10%')).toBeTruthy();
+});
