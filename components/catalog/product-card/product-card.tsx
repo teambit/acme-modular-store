@@ -48,6 +48,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
       }
     >
       <p className={styles.description}>{product.description}</p>
+      <p className={styles.description}>Free 30-day returns</p>
       <div className={styles.meta}>
         <StockBadge stock={product.stock} />
         {product.inStock && <Badge tone="info">Buy 10, save 10%</Badge>}
