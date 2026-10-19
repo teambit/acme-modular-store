@@ -12,21 +12,21 @@
     "apps/storefront": {
         "name": "apps/storefront",
         "scope": "acme-modular.store",
-        "version": "0.0.2",
+        "version": "8e41d8bd47f0dae8fbbe441cc8a8eec473b14c80",
         "mainFile": "index.ts",
         "rootDir": "components/apps/storefront"
     },
     "cart/cart-drawer": {
         "name": "cart/cart-drawer",
         "scope": "acme-modular.store",
-        "version": "0.0.1",
+        "version": "18f1cdbef7575c39d5b6dd45820ea95ef18cf395",
         "mainFile": "index.ts",
         "rootDir": "components/cart/cart-drawer"
     },
     "cart/cart-line-item": {
         "name": "cart/cart-line-item",
         "scope": "acme-modular.store",
-        "version": "0.0.1",
+        "version": "d313a06c5edba60a30ce872e5fe62fdb0502fd94",
         "mainFile": "index.ts",
         "rootDir": "components/cart/cart-line-item"
     },
@@ -40,21 +40,21 @@
     "cart/use-cart": {
         "name": "cart/use-cart",
         "scope": "acme-modular.store",
-        "version": "0.0.1",
+        "version": "d1d98c7e61063100b50f7c9671f82ddf20c5be3f",
         "mainFile": "index.ts",
         "rootDir": "components/cart/use-cart"
     },
     "catalog/product-card": {
         "name": "catalog/product-card",
         "scope": "acme-modular.store",
-        "version": "0.0.2",
+        "version": "4c87ead285d37a3c658a547d24a344c739310464",
         "mainFile": "index.ts",
         "rootDir": "components/catalog/product-card"
     },
     "catalog/product-grid": {
         "name": "catalog/product-grid",
         "scope": "acme-modular.store",
-        "version": "0.0.2",
+        "version": "3f0bd97b0fff84fb9e7ee0006894560c3dd6c163",
         "mainFile": "index.ts",
         "rootDir": "components/catalog/product-grid"
     },
@@ -68,7 +68,7 @@
     "catalog/product-page": {
         "name": "catalog/product-page",
         "scope": "acme-modular.store",
-        "version": "0.0.2",
+        "version": "2b5200476ced1c4dc1d721b04f203c22341739e0",
         "mainFile": "index.ts",
         "rootDir": "components/catalog/product-page"
     },
@@ -86,5 +86,12 @@
         "mainFile": "index.ts",
         "rootDir": "components/catalog/use-products"
     },
-    "$schema-version": "17.0.0"
+    "$schema-version": "17.0.0",
+    "_bit_lane": {
+        "id": {
+            "name": "free-returns",
+            "scope": "acme-modular.store"
+        },
+        "exported": true
+    }
 }
