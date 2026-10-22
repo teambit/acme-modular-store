@@ -12,35 +12,35 @@
     "apps/storefront": {
         "name": "apps/storefront",
         "scope": "acme-modular.store",
-        "version": "e231c84b679d9c35270d2cd2d816dc0b8ed87168",
+        "version": "0.0.4",
         "mainFile": "index.ts",
         "rootDir": "components/apps/storefront"
     },
     "cart/cart-drawer": {
         "name": "cart/cart-drawer",
         "scope": "acme-modular.store",
-        "version": "d8489a07a39432f055ab63e06960c713afb13933",
+        "version": "0.0.3",
         "mainFile": "index.ts",
         "rootDir": "components/cart/cart-drawer"
     },
     "cart/cart-line-item": {
         "name": "cart/cart-line-item",
         "scope": "acme-modular.store",
-        "version": "75279853100c2bc406fe4cb46dad90bc1a88dbff",
+        "version": "0.0.3",
         "mainFile": "index.ts",
         "rootDir": "components/cart/cart-line-item"
     },
     "cart/order-summary": {
         "name": "cart/order-summary",
         "scope": "acme-modular.store",
-        "version": "a22edbb9926f4e041f9d4127b206dd87ad6506eb",
+        "version": "0.0.8",
         "mainFile": "index.ts",
         "rootDir": "components/cart/order-summary"
     },
     "cart/use-cart": {
         "name": "cart/use-cart",
         "scope": "acme-modular.store",
-        "version": "798c327b21db8224ff903c87270cb2ed5e1fbdce",
+        "version": "0.0.3",
         "mainFile": "index.ts",
         "rootDir": "components/cart/use-cart"
     },
@@ -68,7 +68,7 @@
     "catalog/product-page": {
         "name": "catalog/product-page",
         "scope": "acme-modular.store",
-        "version": "43ee51ccea2dcbc81d229792e97586abb32e38eb",
+        "version": "0.0.4",
         "mainFile": "index.ts",
         "rootDir": "components/catalog/product-page"
     },
@@ -86,12 +86,5 @@
         "mainFile": "index.ts",
         "rootDir": "components/catalog/use-products"
     },
-    "$schema-version": "17.0.0",
-    "_bit_lane": {
-        "id": {
-            "name": "t4-drift-1",
-            "scope": "acme-modular.store"
-        },
-        "exported": true
-    }
+    "$schema-version": "17.0.0"
 }
