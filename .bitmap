@@ -33,7 +33,7 @@
     "cart/order-summary": {
         "name": "cart/order-summary",
         "scope": "acme-modular.store",
-        "version": "0.0.7",
+        "version": "a22edbb9926f4e041f9d4127b206dd87ad6506eb",
         "mainFile": "index.ts",
         "rootDir": "components/cart/order-summary"
     },
@@ -86,5 +86,12 @@
         "mainFile": "index.ts",
         "rootDir": "components/catalog/use-products"
     },
-    "$schema-version": "17.0.0"
+    "$schema-version": "17.0.0",
+    "_bit_lane": {
+        "id": {
+            "name": "t4-drift-1",
+            "scope": "acme-modular.store"
+        },
+        "exported": true
+    }
 }
