@@ -6,5 +6,11 @@ description: 'Totals a cart in integer cents, with an optional bulk discount, an
 `summarizeOrder` totals a cart in integer cents and formats every amount only at the end, so totals never drift. Carts that reach the bulk threshold get a percentage off the subtotal, rounded down in the buyer's favor.
 
 ```ts
-orderSummary();
+import { summarizeOrder } from '@acme-modular/store.cart.order-summary';
+
+const summary = summarizeOrder(
+  [{ name: 'Mug', unitPriceCents: 1250, quantity: 12 }],
+  { bulkThreshold: 10, bulkDiscountPercent: 5 }
+);
+// summary.subtotal is the subtotal before the discount; summary.discount?.total is what the buyer pays
 ```
