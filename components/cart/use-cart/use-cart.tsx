@@ -4,7 +4,7 @@ import { summarizeOrder } from '@acme-modular/store.cart.order-summary';
 import type { OrderSummary } from '@acme-modular/store.cart.order-summary';
 import type { Product } from '@acme-modular/platform.entities.product';
 
-/** units across the whole cart that unlock the bulk discount. */
+/** units across the whole cart that unlock the bulk discount (counted over every line, not per product). */
 export const BULK_THRESHOLD = 10;
 /** percent off the subtotal once the cart reaches `BULK_THRESHOLD` units. */
 export const BULK_DISCOUNT_PERCENT = 10;
