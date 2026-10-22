@@ -6,7 +6,7 @@ import type { Product } from '@acme-modular/platform.entities.product';
 
 /** units across the whole cart that unlock the bulk discount (counted over every line, not per product). */
 export const BULK_THRESHOLD = 10;
-/** percent off the subtotal once the cart reaches `BULK_THRESHOLD` units. */
+/** percent off the subtotal once the cart reaches `BULK_THRESHOLD` units (rounded down to the cent). */
 export const BULK_DISCOUNT_PERCENT = 10;
 
 /** one product in the cart. The price is captured when the product is added. */
