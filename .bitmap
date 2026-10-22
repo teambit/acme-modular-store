@@ -12,35 +12,35 @@
     "apps/storefront": {
         "name": "apps/storefront",
         "scope": "acme-modular.store",
-        "version": "0.0.6",
+        "version": "1022d352e443721b5a60399c6192a5f8cf708658",
         "mainFile": "index.ts",
         "rootDir": "components/apps/storefront"
     },
     "cart/cart-drawer": {
         "name": "cart/cart-drawer",
         "scope": "acme-modular.store",
-        "version": "0.0.5",
+        "version": "175d1272518ce4a9ff0852fc53721f475b7881f0",
         "mainFile": "index.ts",
         "rootDir": "components/cart/cart-drawer"
     },
     "cart/cart-line-item": {
         "name": "cart/cart-line-item",
         "scope": "acme-modular.store",
-        "version": "0.0.5",
+        "version": "04d471cbd4fd25b9da52ae94882189deed6eeddb",
         "mainFile": "index.ts",
         "rootDir": "components/cart/cart-line-item"
     },
     "cart/order-summary": {
         "name": "cart/order-summary",
         "scope": "acme-modular.store",
-        "version": "0.0.9",
+        "version": "0a9ade6164944208df29aad712572b48fabc83b4",
         "mainFile": "index.ts",
         "rootDir": "components/cart/order-summary"
     },
     "cart/use-cart": {
         "name": "cart/use-cart",
         "scope": "acme-modular.store",
-        "version": "0.0.5",
+        "version": "ab031737e6c1023c0e997c8e56edfd325aafd76e",
         "mainFile": "index.ts",
         "rootDir": "components/cart/use-cart"
     },
@@ -68,7 +68,7 @@
     "catalog/product-page": {
         "name": "catalog/product-page",
         "scope": "acme-modular.store",
-        "version": "0.0.6",
+        "version": "9df222959079ac390572b4624824ff4d273906a0",
         "mainFile": "index.ts",
         "rootDir": "components/catalog/product-page"
     },
@@ -86,5 +86,12 @@
         "mainFile": "index.ts",
         "rootDir": "components/catalog/use-products"
     },
-    "$schema-version": "17.0.0"
+    "$schema-version": "17.0.0",
+    "_bit_lane": {
+        "id": {
+            "name": "t4-drift-2",
+            "scope": "acme-modular.store"
+        },
+        "exported": true
+    }
 }
